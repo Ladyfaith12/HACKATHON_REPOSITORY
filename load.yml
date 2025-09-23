@@ -1,25 +1,49 @@
 config:
   target: "https://qa.api.pwfieldtool.com"
-  tls: 
+  tls:
     rejectUnauthorized: false
   phases:
     - name: "load testing"
-      duration: 3   # 2 minutes
-      arrivalRate: 1 # 20 new users per second
+      duration: 300   # 5 minutes
+      arrivalRate: 2
+      rampTo: 20
   defaults:
     headers:
       Content-Type: "application/json"
       Authorization: ""
-
 scenarios:
   - name: "Evaluation"
     flow:
       - get:
           url: "/v1/evaluations"
           capture:
-            json: "$[0].eval_id"  
-            as: "eval_id" 
-      - log: "capture id : {{eval_id}}"
+            json: "$[*].eval_id"
+            as: "eval_ids"
+      - function: "selectRandomEval"
+      - log: "Selected eval_id: {{ eval_id }}"
       - get:
           url: "/v1/evaluations/{{ eval_id }}"
+      - patch:
+          url: "/v1/evaluations/{{ eval_id }}"
+          json:
+            workflow_status: "capturing_in_progress"
+            owner_name: "Gary Podzemy"
+            valuation_reasons:
+              - "Financing"
+            notes: "This is the note. Updated"
+            primary_contact: "Abraham Abbey"
+            primary_contact_id: "6eb6d8f9-1709-4f20-9eab-5bcf7f890116"
+            owner: "garypodz@gmail.com"
+            owner_id: "254000"
+            location: "C"
+            opportunity_id: "70460"
+            fee_code: "A - $100 Listing Fee"
 
+processor: |
+  module.exports = {
+    selectRandomEval: function(context, events, done) {
+      const ids = context.vars.eval_ids;
+      context.vars.eval_id = ids[Math.floor(Math.random() * ids.length)];""
+      return done();
+    }
+  };
