@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  load-test:
+  performance-tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -16,7 +16,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'   # 👈 Use Node.js 20
+          node-version: '20'
 
       - name: Install Artillery
         run: npm install -g artillery
@@ -24,15 +24,15 @@ jobs:
       - name: Debug - List files
         run: ls -R
 
-      - name: Run Load Test
+      - name: Run Stress and Load Tests
         run: |
           mkdir -p reports
-          artillery run HACKATHON_PROJECT/stress.yml --output reports/results.json
+          artillery run HACKATHON_PROJECT/stress.yml --output reports/stress-results.json
           artillery run HACKATHON_PROJECT/load.yml --output reports/load-results.json
 
-      - name: Upload Report
+      - name: Upload All Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: load-test-report
-          path: reports/results.json
+          name: performance-test-reports
+          path: reports/
