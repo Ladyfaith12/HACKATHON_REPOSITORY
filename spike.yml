@@ -1,0 +1,16 @@
+config:
+  target: "https://qa-app.cliquidator.info"
+  tls: 
+    rejectUnauthorized: false  
+  phases:
+    - name: "Stress testing"
+      duration: 120   # 2 minutes
+      arrivalRate: 20 # 20 new users per second
+  defaults:
+    headers:
+      Content-Type: "application/json"
+scenarios:
+  - name: "User submits form"
+    flow:
+      - get:
+          url: "/login"

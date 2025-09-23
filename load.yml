@@ -1,0 +1,25 @@
+config:
+  target: "https://qa.api.pwfieldtool.com"
+  tls: 
+    rejectUnauthorized: false
+  phases:
+    - name: "load testing"
+      duration: 3   # 2 minutes
+      arrivalRate: 1 # 20 new users per second
+  defaults:
+    headers:
+      Content-Type: "application/json"
+      Authorization: ""
+
+scenarios:
+  - name: "Evaluation"
+    flow:
+      - get:
+          url: "/v1/evaluations"
+          capture:
+            json: "$[0].eval_id"  
+            as: "eval_id" 
+      - log: "capture id : {{eval_id}}"
+      - get:
+          url: "/v1/evaluations/{{ eval_id }}"
+
