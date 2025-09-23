@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-  workflow_dispatch: 
+  workflow_dispatch:   # for manual trigger
 
 jobs:
   load-test:
@@ -31,7 +31,7 @@ jobs:
 
       - name: Upload Report
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: load-test-report
           path: reports/results.json
