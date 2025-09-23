@@ -27,7 +27,7 @@ jobs:
       - name: Run Load Test
         run: |
           mkdir -p reports
-          artillery run stress-test.yml --output reports/results.json
+          artillery run stress.yml --output reports/results.json
 
       - name: Upload Report
         if: always()
