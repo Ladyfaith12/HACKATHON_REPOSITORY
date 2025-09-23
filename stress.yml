@@ -2,25 +2,136 @@ config:
   target: "https://qa.api.pwfieldtool.com"
   tls: 
     rejectUnauthorized: false
+  processor: "./selectRandomEval.js"
+  
+  # Stress Test Phases - Gradually increase load until breaking point
   phases:
-    - name: "Stress test"
-      duration: 300  # 2 minutes
-      arrivalRate: 10 # 20 new users per second
-      rampTo: 20
+    # Phase 1: Warm up
+    - name: "warm_up"
+      duration: 60        # 1 minute warm up
+      arrivalRate: 5      # Start with 5 users/second
+    
+    # Phase 2: Ramp up gradually
+    - name: "ramp_up_phase_1" 
+      duration: 120       # 2 minutes
+      arrivalRate: 5      # Start at 5/sec
+      rampTo: 15          # Increase to 15/sec
+    
+    # Phase 3: Moderate stress
+    - name: "ramp_up_phase_2"
+      duration: 120       # 2 minutes  
+      arrivalRate: 15     # Start at 15/sec
+      rampTo: 30          # Increase to 30/sec
+    
+    # Phase 4: High stress
+    - name: "high_stress"
+      duration: 180       # 3 minutes
+      arrivalRate: 30     # Start at 30/sec
+      rampTo: 60          # Increase to 60/sec
+      
+    # Phase 5: Peak stress - find breaking point
+    - name: "peak_stress"
+      duration: 120       # 2 minutes
+      arrivalRate: 60     # Start at 60/sec
+      rampTo: 100         # Push to 100/sec
+    
+    # Phase 6: Extreme stress - test system limits
+    - name: "extreme_stress"
+      duration: 60        # 1 minute
+      arrivalRate: 100    # Start at 100/sec
+      rampTo: 150         # Push to 150/sec
+    
+    # Phase 7: Cool down - see recovery
+    - name: "cool_down"
+      duration: 60        # 1 minute
+      arrivalRate: 10     # Drop back down
+
   defaults:
     headers:
       Content-Type: "application/json"
-      Authorization: "eyJraWQiOiJMV1gxQktpRFFvSTdBdElDQ1ZmZk1jSUg2RWNtQ1c3c2JBell1Y0REOXFnPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI2NDI4MDRkOC00MGExLTcwNzMtNjc3YS0yZDM4NzkzYjEyNzMiLCJjb2duaXRvOmdyb3VwcyI6WyJBZG1pbiJdLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLnVzLWVhc3QtMS5hbWF6b25hd3MuY29tXC91cy1lYXN0LTFfSUY2T3k1TzR6IiwiY29nbml0bzp1c2VybmFtZSI6ImVtbWFudWVsLm9mb3JpQHB1cnBsZXdhdmUuY29tIiwib3JpZ2luX2p0aSI6ImZkYWE5YjRlLTkwOTAtNDM1OS1iODEwLWQyYWI0OThiOGQ3MyIsImF1ZCI6ImNjb2prc3ZyZjdtYnNsZDdoNzZsbGxzMHMiLCJldmVudF9pZCI6IjgxZjBhZmUzLWIwMzItNDM1Mi05ZGNmLTU5OWJjZjk5MDc1MCIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNzU3NTE4ODU2LCJuYW1lIjoiRW1tYW51ZWwgT2ZvcmkiLCJleHAiOjE3NTc1MjYyMjAsImlhdCI6MTc1NzUyMjYyMCwianRpIjoiMzczZWIwYWUtNGU0Ni00YjQ5LWIzYWYtYTc4M2M1OWE5MzdiIiwiZW1haWwiOiJlbW1hbnVlbC5vZm9yaUBwdXJwbGV3YXZlLmNvbSJ9.7Tq_qxfdG6iDeZ_nqf4Dehfy4bX1v22qfdAiz5-IJV_zc7QErHAyvozBKlDctH0XdZ71XpolsNZYx3uiy0piTQyyGTCA8fB-JSRkLJzsyzRT7peqP7lxIwRNfA_7fCH5XSnAx19ogD2sdW7bPMxbFaYZ1Bom_dI9b6PNLuU2EaJ6w6Onta9n55EA6Qev893BklstD_WY3lvotYZGpudgoknNNDYpieos6wKjTrbOIDkkQOdoTmnyU5MDjzmhWqjFBc1ZrtqqNnnsudqTp_PuyBbSZ0Ax-GU7UqhfFjXlK1Kkta9h7yUNijP1sJT8H7DR1AoKCspkgbKljricHueHrw"
+      Authorization: ""
 
+  # Stress test specific settings
+  http:
+    timeout: 30000          # 30 second timeout (higher for stress testing)
+    maxSockets: 100         # Allow more concurrent connections
+    
 scenarios:
-  - name: "Evaluation"
+  # Scenario 1: Heavy evaluation workflow (70% of traffic)
+  - name: "Heavy_Evaluation_Workflow"
+    weight: 70
     flow:
       - get:
           url: "/v1/evaluations"
           capture:
-            json: "$[0].eval_id"  
-            as: "eval_id" 
-      - log: "capture id : {{eval_id}}"
+            - json: "$"
+              as: "full_response"
+            - json: "$[*].eval_id"
+              as: "eval_ids"
+      - function: "selectRandomEval"
       - get:
           url: "/v1/evaluations/{{ eval_id }}"
+          expect:
+            - statusCode: [200, 404]  # Allow 404s during stress testing
+      - patch:
+          url: "/v1/evaluations/{{ eval_id }}"
+          json:
+            workflow_status: "capture_in_progress"
+            owner_name: "Stress Test User"
+            valuation_reasons: ["Stress Testing"]
+            notes: "Stress test update - {{ $randomString() }}"
+            primary_contact: "Stress Test Contact"
+            primary_contact_id: "6eb6d8f9-1709-4f20-9eab-5bcf7f890116"
+            owner: "stress.test@example.com"
+            owner_id: "{{ $randomInt(100000, 999999) }}"
+            location: "{{ $randomString() }}"
+            opportunity_id: "{{ $randomInt(10000, 99999) }}"
+            fee_code: "Stress Test Fee"
+          expect:
+            - statusCode: [200, 400, 404, 429, 500, 502, 503]  # Expect potential failures
 
+  # Scenario 2: Read-only stress (20% of traffic) 
+  - name: "Read_Only_Stress"
+    weight: 20
+    flow:
+      - get:
+          url: "/v1/evaluations"
+          expect:
+            - statusCode: [200, 429, 500, 502, 503]
+      - function: "selectRandomEval"
+      - get:
+          url: "/v1/evaluations/{{ eval_id }}"
+          expect:
+            - statusCode: [200, 404, 429, 500, 502, 503]
+
+  # Scenario 3: Rapid fire updates (10% of traffic)
+  - name: "Rapid_Updates"
+    weight: 10 
+    flow:
+      - get:
+          url: "/v1/evaluations"
+          capture:
+            - json: "$"
+              as: "full_response" 
+            - json: "$[*].eval_id"
+              as: "eval_ids"
+      - function: "selectRandomEval"
+      # Rapid succession of updates to same eval
+      - patch:
+          url: "/v1/evaluations/{{ eval_id }}"
+          json:
+            notes: "Rapid update 1 - {{ $timestamp() }}"
+          expect:
+            - statusCode: [200, 400, 404, 429, 500, 502, 503]
+      - patch:
+          url: "/v1/evaluations/{{ eval_id }}"
+          json:
+            notes: "Rapid update 2 - {{ $timestamp() }}"  
+          expect:
+            - statusCode: [200, 400, 404, 409, 429, 500, 502, 503]
+      - patch:
+          url: "/v1/evaluations/{{ eval_id }}"
+          json:
+            notes: "Rapid update 3 - {{ $timestamp() }}"
+          expect:
+            - statusCode: [200, 400, 404, 409, 429, 500, 502, 503]
