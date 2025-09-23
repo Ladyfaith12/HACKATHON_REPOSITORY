@@ -1,4 +1,6 @@
 Prerequistes
+
+Before running tests, make sure you have:
 node --version  # Should output v18.x.x or higher
 npm --version   # Should output 9.x.x or higher
 git --version   # Should output 2.x.x or higher
@@ -11,13 +13,28 @@ git clone https://github.com/Ladyfaith12/HACKATHON_REPOSITORY.git
 cd HACKATHON_REPOSITORY
 
 Step 2: Install and run Artillery
-npx artillery run {{file}}
+We already have load.yml, stress.yml, and spike.yml configured.
+
+Run any test with:
+
+npx artillery run load.yml -o reports/load-report.json
+npx artillery report --output reports/load-report.html reports/load-report.json
+
+Open the HTML report:
+
+macOS: open reports/load-report.html
+
+Linux: xdg-open reports/load-report.html
+
+Windows (PowerShell): start reports\load-report.html
+
 
 ###To create your own ####
+
 1. Create a .yml file
 2. Create a base test
 
-Sample to use
+Add the fllowing minimal config
 
 config:
   target: "https://httpbin.org"  # Replace with your app's URL
@@ -36,7 +53,11 @@ scenarios:
       - get:
           url: "/get"  # Endpoint to stress (e.g., your API route)
 
-3. open your terminal and run "npx artillery run {{file}}"
+3. open your terminal and run:
+mkdir -p reports
+npx artillery run my-test.yml -o reports/my-test.json
+npx artillery report --output reports/my-test.html reports/my-test.json
+
 
 ## Key Terms Explained ##
 
