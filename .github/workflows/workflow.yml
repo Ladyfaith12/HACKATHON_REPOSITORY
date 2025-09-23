@@ -28,6 +28,7 @@ jobs:
         run: |
           mkdir -p reports
           artillery run HACKATHON_PROJECT/stress.yml --output reports/results.json
+          artillery run HACKATHON_PROJECT/load.yml --output reports/load-results.json
 
       - name: Upload Report
         if: always()
