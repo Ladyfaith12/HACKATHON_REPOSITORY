@@ -49,7 +49,7 @@ config:
   defaults:
     headers:
       Content-Type: "application/json"
-      Authorization: ""
+      Authorization: "{{ $processEnvironment.AUTH_TOKEN }}"
 
   # Stress test specific settings
   http:

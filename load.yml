@@ -11,7 +11,7 @@ config:
   defaults:
     headers:
       Content-Type: "application/json"
-      Authorization: ""
+      Authorization: "{{ $processEnvironment.AUTH_TOKEN }}"
 scenarios:
   - name: "Evaluation"
     flow:
