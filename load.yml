@@ -1,4 +1,17 @@
-
+config:
+  target: "https://qa.api.pwfieldtool.com"
+  tls: 
+    rejectUnauthorized: false
+  processor: "./selectRandomEval.js"  # correct spelling
+  phases:
+    - name: "load testing"
+      duration: 300
+      arrivalRate: 2
+      rampTo: 5
+  defaults:
+    headers:
+      Content-Type: "application/json"
+      Authorization: ""
 scenarios:
   - name: "Evaluation"
     flow:
