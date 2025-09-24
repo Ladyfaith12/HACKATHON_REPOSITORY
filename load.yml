@@ -5,7 +5,7 @@ config:
   processor: "./selectRandomEval.js"  # correct spelling
   phases:
     - name: "load testing"
-      duration: 300
+      duration: 5
       arrivalRate: 2
       rampTo: 5
   defaults:

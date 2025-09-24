@@ -23,27 +23,79 @@ async function analyzeTestResults(testResults) {
         const prompt = {
             messages: [{
                 role: "user",
-                content: `You are a performance testing expert. Analyze this Artillery.io performance test result and provide detailed recommendations for improvement. 
+                content: `You are a performance testing expert. Analyze this Artillery.io performance test result and provide detailed recommendations for improvement using a clear, structured Markdown format.
                 Focus on identifying performance bottlenecks, scalability issues, and potential optimizations.
 
                 Here is the complete test result data:
                 ${JSON.stringify(testResults, null, 2)}
 
-                Please analyze the following aspects:
-                1. Load test configuration (phases, duration, virtual users)
-                2. Response time metrics (min, max, mean, median, percentiles)
-                3. Request/Response statistics (success rates, error rates, status codes)
-                4. Throughput metrics (requests per second, scenarios completed)
-                5. Error analysis (if any errors occurred)
+                Please provide your analysis in the following Markdown format:
 
-                Then provide:
-                1. Key observations about the test results and overall system performance
-                2. Detailed analysis of any identified performance bottlenecks or issues
-                3. Specific, actionable recommendations for improvement
-                4. Suggested next steps, including additional test scenarios or configurations to try
-                5. If there were errors, analyze their causes and suggest fixes
+                # 📊 Performance Test Analysis Summary
 
-                Please be thorough in your analysis and specific in your recommendations.`
+                ## 🎯 Quick Overview
+                - **Test Status**: [SUCCESS/PARTIAL SUCCESS/FAILED]
+                - **Critical Issues**: [YES/NO] (If yes, list top 3)
+                - **Overall Performance**: [GOOD/NEEDS IMPROVEMENT/POOR]
+
+                ## 📈 Test Configuration Analysis
+                ### Load Parameters
+                - Test Duration: [duration]
+                - Virtual Users: [number]
+                - Scenarios: [list]
+
+                ### Response Time Metrics
+                | Metric | Value | Status |
+                |--------|--------|--------|
+                | Min Response Time | [value] ms | 🟢/🟡/🔴 |
+                | Max Response Time | [value] ms | 🟢/🟡/🔴 |
+                | Median Response Time | [value] ms | 🟢/🟡/🔴 |
+                | 95th Percentile | [value] ms | 🟢/🟡/🔴 |
+
+                ### Request Statistics
+                - Total Requests: [number]
+                - Success Rate: [percentage]%
+                - Error Rate: [percentage]%
+                - Throughput: [requests/second]
+
+                ## 🚨 Performance Bottlenecks
+                ### Critical Issues
+                1. [Issue 1]
+                   - Impact: [HIGH/MEDIUM/LOW]
+                   - Description: [details]
+                2. [Issue 2]
+                   - Impact: [HIGH/MEDIUM/LOW]
+                   - Description: [details]
+
+                ### Error Analysis
+                - [Error Type 1]: [count] occurrences
+                  - Cause: [explanation]
+                  - Solution: [recommendation]
+
+                ## 💡 Recommendations
+                ### Immediate Actions
+                1. ⚡ [High Priority Action]
+                   - Expected Impact: [description]
+                   - Implementation: [steps]
+
+                ### Long-term Improvements
+                1. 📈 [Improvement 1]
+                   - Benefits: [description]
+                   - Implementation: [steps]
+
+                ## 🔄 Next Steps
+                1. [Next Step 1]
+                   - Priority: [HIGH/MEDIUM/LOW]
+                   - Timeline: [Immediate/This Week/This Month]
+                2. [Next Step 2]
+                   - Priority: [HIGH/MEDIUM/LOW]
+                   - Timeline: [Immediate/This Week/This Month]
+
+                ## 📝 Additional Notes
+                - [Any other relevant observations]
+                - [Potential risks or concerns]
+
+                Please ensure all recommendations are specific, actionable, and prioritized based on their potential impact.`
             }],
             model: "claude-3-opus-20240229",
             max_tokens: 2000
