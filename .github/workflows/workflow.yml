@@ -10,7 +10,8 @@ jobs:
   performance-tests:
     runs-on: ubuntu-latest
     env:
-       AUTH_TOKEN: ${{ secrets.AUTHORIZATION }}
+      AUTH_TOKEN: ${{ secrets.AUTHORIZATION }}   # Make sure secret is set in GitHub
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -23,13 +24,26 @@ jobs:
       - name: Install Artillery
         run: npm install -g artillery
 
-      - name: Debug - List files
-        run: ls -R
+      # Debug step: check if AUTH_TOKEN is being passed correctly
+      - name: Debug Auth Token Presence
+        run: |
+          if [ -z "$AUTH_TOKEN" ]; then
+            echo "❌ AUTH_TOKEN is not set!"
+            exit 1
+          else
+            echo "✅ AUTH_TOKEN is present"
+            echo "🔑 AUTH_TOKEN length: ${#AUTH_TOKEN}"
+          fi
+
+      # Optional: show what will be sent in the Authorization header (masked)
+      - name: Show Masked Header
+        run: |
+          echo "Authorization header would look like:"
+          echo "Authorization: ****** (hidden for security)"
 
       - name: Run Load Tests
         run: |
           mkdir -p reports
-          
           artillery run load.yml --output reports/load-results.json
 
       - name: Upload All Reports
