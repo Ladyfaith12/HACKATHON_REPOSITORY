@@ -87,7 +87,7 @@ async function runArtilleryTest(testFile) {
         const reportFile = path.join(reportsDir, 'report.json');
         
         // Run artillery test with JSON output
-        const command = `artillery run --output ${reportFile} ${testFile} --record --key a9_pxaa7rda12qcuyqa4nadpzfvux4gvlpa`;
+        const command = `artillery run --output ${reportFile} ${testFile} `;
         console.log(`Running artillery test: ${command}`);
         
         const { stdout, stderr } = await execPromise(command);

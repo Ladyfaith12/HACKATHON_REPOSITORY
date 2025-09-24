@@ -4,7 +4,8 @@
   "description": "Performance test with Artillery and get recommendations from Ai",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
+    
+  "start": "node app.js load.yml && npx artillery report ./reports/report.json -o ./reports/report.html",
     "test": "node app.js",
     "start:file": "node app.js"
   },
