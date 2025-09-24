@@ -5,6 +5,12 @@ echo "# Environment variables
 
 # Dependencies
 node_modules/
+package-lock.json
+
+# Test reports and analysis
+reports/
+analysis.md
+report.json
 
 # Logs
 *.log
